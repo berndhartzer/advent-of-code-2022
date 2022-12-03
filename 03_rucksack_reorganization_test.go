@@ -12,14 +12,14 @@ func rucksackReorganizationPartOne(contents []string) int {
 	for _, line := range contents {
 		firstItems := map[byte]bool{}
 		secondItems := map[byte]bool{}
-		half := len(line)/2
+		half := len(line) / 2
 
 		for i := 0; i < half; i++ {
 			firstItems[line[i]] = true
 			secondItems[line[i+half]] = true
 		}
 
-		for b, _ := range firstItems {
+		for b := range firstItems {
 			_, ok := secondItems[b]
 			if ok {
 				dups = append(dups, b)
@@ -36,9 +36,9 @@ func rucksackReorganizationPartOne(contents []string) int {
 	// e.g. character p = byte(112), 112 - 96 = 16
 	for _, v := range dups {
 		if v > 90 {
-			total += (int(v)-96)
+			total += (int(v) - 96)
 		} else {
-			total += (int(v)-38)
+			total += (int(v) - 38)
 		}
 	}
 
@@ -54,7 +54,7 @@ func rucksackReorganizationPartTwo(contents []string) int {
 	groups[2] = map[byte]bool{}
 
 	finaliseGroup := func() {
-		for b, _ := range groups[0] {
+		for b := range groups[0] {
 			_, ok := groups[1][b]
 			if !ok {
 				continue
@@ -95,9 +95,9 @@ func rucksackReorganizationPartTwo(contents []string) int {
 	// e.g. character p = byte(112), 112 - 96 = 16
 	for _, v := range dups {
 		if v > 90 {
-			total += (int(v)-96)
+			total += (int(v) - 96)
 		} else {
-			total += (int(v)-38)
+			total += (int(v) - 38)
 		}
 	}
 
@@ -147,7 +147,6 @@ func TestDayThree(t *testing.T) {
 					"CrZsJsPPZsGzwwsLwLmpwMDw",
 				},
 				expected: 157,
-
 			},
 			"solution": {
 				input:     input,
@@ -170,7 +169,6 @@ func TestDayThree(t *testing.T) {
 					"CrZsJsPPZsGzwwsLwLmpwMDw",
 				},
 				expected: 70,
-
 			},
 			"solution": {
 				input:     input,
