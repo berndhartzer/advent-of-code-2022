@@ -2,10 +2,10 @@ package aoc
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"testing"
 	"time"
-	"regexp"
 )
 
 type stack struct {
@@ -23,7 +23,7 @@ func (s *stack) pop() string {
 	return last
 }
 
-func (s *stack) peek() string{
+func (s *stack) peek() string {
 	idx := len(s.values) - 1
 	return s.values[idx]
 }
@@ -47,7 +47,7 @@ func supplyStacksPartOne(input []string) string {
 	}
 
 	// parse stacks by looping backwards through input
-	for k := endStacksIdx-1; k >= 0; k-- {
+	for k := endStacksIdx - 1; k >= 0; k-- {
 		line := input[k]
 
 		// loop through columns
@@ -55,7 +55,7 @@ func supplyStacksPartOne(input []string) string {
 		for i := 1; i < len(line); i += 4 {
 			if k == endStacksIdx-1 {
 				stacks = append(stacks, &stack{})
-				stackMap[i] = len(stacks)-1
+				stackMap[i] = len(stacks) - 1
 				continue
 			}
 
@@ -69,7 +69,7 @@ func supplyStacksPartOne(input []string) string {
 	re := regexp.MustCompile("[0-9]+")
 
 	// loop through instructions
-	for i := endStacksIdx+1; i < len(input); i++ {
+	for i := endStacksIdx + 1; i < len(input); i++ {
 		nums := re.FindAllString(input[i], -1)
 
 		numToMove, err := strconv.Atoi(nums[0])
