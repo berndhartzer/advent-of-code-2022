@@ -28,10 +28,15 @@ func (s *stack) peek() string {
 	return s.values[idx]
 }
 
-func (s *stack) echo() {
-	for _, v := range s.values {
-		fmt.Println(v)
-	}
+func (s *stack) pushMulti(items []string) {
+	s.values = append(s.values, items...)
+}
+
+func (s *stack) popMulti(n int) []string {
+	idx := len(s.values) - n
+	last := s.values[idx:]
+	s.values = s.values[:idx]
+	return last
 }
 
 func supplyStacksPartOne(input []string) string {
@@ -85,13 +90,79 @@ func supplyStacksPartOne(input []string) string {
 			panic("failed to convert string to int")
 		}
 
-		for j := 0; j < numToMove; j++ {
-			fromStack := stacks[from-1]
-			toStack := stacks[to-1]
+		fromStack := stacks[from-1]
+		toStack := stacks[to-1]
 
+		for j := 0; j < numToMove; j++ {
 			item := fromStack.pop()
 			toStack.push(item)
 		}
+	}
+
+	tops := ""
+	for _, v := range stacks {
+		tops += v.peek()
+	}
+
+	return tops
+}
+
+func supplyStacksPartTwo(input []string) string {
+	stacks := []*stack{}
+	stackMap := map[int]int{}
+
+	endStacksIdx := 0
+	for inputIdx, line := range input {
+		if line == "" {
+			endStacksIdx = inputIdx
+			break
+		}
+	}
+
+	// parse stacks by looping backwards through input
+	for k := endStacksIdx - 1; k >= 0; k-- {
+		line := input[k]
+
+		// loop through columns
+		// this relies on the fact that the input stacks are padded with spaces
+		for i := 1; i < len(line); i += 4 {
+			if k == endStacksIdx-1 {
+				stacks = append(stacks, &stack{})
+				stackMap[i] = len(stacks) - 1
+				continue
+			}
+
+			if string(line[i]) != " " {
+				stacks[stackMap[i]].push(string(line[i]))
+			}
+		}
+	}
+
+	// regex to find numbers
+	re := regexp.MustCompile("[0-9]+")
+
+	// loop through instructions
+	for i := endStacksIdx + 1; i < len(input); i++ {
+		nums := re.FindAllString(input[i], -1)
+
+		numToMove, err := strconv.Atoi(nums[0])
+		if err != nil {
+			panic("failed to convert string to int")
+		}
+		from, err := strconv.Atoi(nums[1])
+		if err != nil {
+			panic("failed to convert string to int")
+		}
+		to, err := strconv.Atoi(nums[2])
+		if err != nil {
+			panic("failed to convert string to int")
+		}
+
+		fromStack := stacks[from-1]
+		toStack := stacks[to-1]
+
+		items := fromStack.popMulti(numToMove)
+		toStack.pushMulti(items)
 	}
 
 	tops := ""
@@ -156,5 +227,30 @@ func TestDayFive(t *testing.T) {
 		}
 
 		runTests(t, tests, supplyStacksPartOne)
+	})
+
+	t.Run("part two", func(t *testing.T) {
+		tests := map[string]testConfig{
+			"test_1": {
+				input: []string{
+					"    [D]    ",
+					"[N] [C]    ",
+					"[Z] [M] [P]",
+					" 1   2   3 ",
+					"",
+					"move 1 from 2 to 1",
+					"move 3 from 1 to 3",
+					"move 2 from 2 to 1",
+					"move 1 from 1 to 2",
+				},
+				expected: "MCD",
+			},
+			"solution": {
+				input:     input,
+				logResult: true,
+			},
+		}
+
+		runTests(t, tests, supplyStacksPartTwo)
 	})
 }
