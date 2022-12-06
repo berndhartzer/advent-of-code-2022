@@ -17,7 +17,7 @@ func tuningTroublePartTwo(input string) int {
 func tuningTrouble(input string, size int) int {
 	i := 0
 	for ; i < len(input)-(size-1); i++ {
-		window := input[i:i+size]
+		window := input[i : i+size]
 		unique := map[rune]bool{}
 
 		for _, r := range window {
@@ -66,7 +66,7 @@ func TestDaySix(t *testing.T) {
 	t.Run("part one", func(t *testing.T) {
 		tests := map[string]testConfig{
 			"test_1": {
-				input: "mjqjpqmgbljsphdztnvjfqwrcgsmlb",
+				input:    "mjqjpqmgbljsphdztnvjfqwrcgsmlb",
 				expected: 7,
 			},
 			"solution": {
