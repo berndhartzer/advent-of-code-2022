@@ -29,7 +29,37 @@ func (f *fileTreeNode) totalUnderThreshold(threshold int) int {
 	return total
 }
 
+func (f *fileTreeNode) deleteDir(target int) int {
+	total := f.size
+
+	for _, child := range f.children {
+		candidate := child.deleteDir(target)
+
+		if candidate > target && candidate < total {
+			total = candidate
+		}
+	}
+
+	return total
+}
+
 func noSpaceLeftOnDevicePartOne(input []string) int {
+	root := buildFileTree(input)
+	return root.totalUnderThreshold(100000)
+}
+
+func noSpaceLeftOnDevicePartTwo(input []string) int {
+	root := buildFileTree(input)
+
+	totalSpace := 70000000
+	needSpace := 30000000
+	freeSpace := totalSpace - root.size
+	diffNeed := needSpace - freeSpace
+
+	return root.deleteDir(diffNeed)
+}
+
+func buildFileTree(input []string) *fileTreeNode {
 	root := &fileTreeNode{
 		name:     "/",
 		parent:   nil,
@@ -94,9 +124,7 @@ func noSpaceLeftOnDevicePartOne(input []string) int {
 		}
 	}
 
-	total := root.totalUnderThreshold(100000)
-
-	return total
+	return root
 }
 
 func TestDaySeven(t *testing.T) {
@@ -167,5 +195,44 @@ func TestDaySeven(t *testing.T) {
 		}
 
 		runTests(t, tests, noSpaceLeftOnDevicePartOne)
+	})
+
+	t.Run("part two", func(t *testing.T) {
+		tests := map[string]testConfig{
+			"test_1": {
+				input: []string{
+					"$ cd /",
+					"$ ls",
+					"dir a",
+					"14848514 b.txt",
+					"8504156 c.dat",
+					"dir d",
+					"$ cd a",
+					"$ ls",
+					"dir e",
+					"29116 f",
+					"2557 g",
+					"62596 h.lst",
+					"$ cd e",
+					"$ ls",
+					"584 i",
+					"$ cd ..",
+					"$ cd ..",
+					"$ cd d",
+					"$ ls",
+					"4060174 j",
+					"8033020 d.log",
+					"5626152 d.ext",
+					"7214296 k",
+				},
+				expected: 24933642,
+			},
+			"solution": {
+				input:     input,
+				logResult: true,
+			},
+		}
+
+		runTests(t, tests, noSpaceLeftOnDevicePartTwo)
 	})
 }
