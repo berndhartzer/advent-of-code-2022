@@ -142,7 +142,6 @@ func ropeBridgePartTwo(input []string) int {
 				case yDist < -1:
 					thisKnot.y -= 1
 				}
-
 			}
 
 			tailPos := fmt.Sprintf("%d,%d", rope[9].x, rope[9].y)
