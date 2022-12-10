@@ -11,8 +11,8 @@ import (
 type cpu struct {
 	xRegister     int
 	cycles        int
-	postCycleHook func(cycles int, xRegister int) bool
 	preCycleHook  func(cycles int, xRegister int) bool
+	postCycleHook func(cycles int, xRegister int) bool
 }
 
 func (c *cpu) execute(instruction string) bool {
