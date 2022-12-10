@@ -84,6 +84,85 @@ func cathodeRayTubePartOne(input []string) int {
 	return signal
 }
 
+type cathodeRayTube struct {
+	xRegister int
+	cycles int
+	screen [240]string
+}
+
+func (c *cathodeRayTube) execute(instruction string) bool {
+	exit := c.runCycle()
+	if exit {
+		return exit
+	}
+
+	if instruction == "noop" {
+		return false
+	}
+
+	parts := strings.Fields(instruction)
+	n, err := strconv.Atoi(parts[1])
+	if err != nil {
+		panic("failed to convert string to int")
+	}
+
+	exit = c.runCycle()
+	if exit {
+		return exit
+	}
+
+	c.xRegister += n
+	return false
+}
+
+func (c *cathodeRayTube) runCycle() bool {
+	if c.cycles >= len(c.screen) {
+		return true
+	}
+
+	// translate sprite vertical position according to screen of 40 x 6
+	spritePos := c.xRegister + ((c.cycles/40)*40)
+
+	drawPixel := "."
+	if spritePos == c.cycles || spritePos-1 == c.cycles || spritePos+1 == c.cycles {
+		drawPixel = "#"
+	}
+
+	c.screen[c.cycles] = drawPixel
+
+	c.cycles++
+
+	return false
+}
+
+func (c *cathodeRayTube) view() {
+	rows := [][]string{
+		c.screen[0:40],
+		c.screen[40:80],
+		c.screen[80:120],
+		c.screen[120:160],
+		c.screen[160:200],
+		c.screen[200:240],
+	}
+	for _, row := range rows {
+		fmt.Println(row)
+	}
+}
+
+func cathodeRayTubePartTwo(input []string) int {
+	crt := &cathodeRayTube{
+		xRegister: 1,
+		screen: [240]string{},
+	}
+
+	for _, instruction := range input {
+		crt.execute(instruction)
+	}
+	crt.view()
+
+	return 0
+}
+
 func TestDayTen(t *testing.T) {
 	type testConfig struct {
 		input     []string
@@ -275,5 +354,16 @@ func TestDayTen(t *testing.T) {
 		}
 
 		runTests(t, tests, cathodeRayTubePartOne)
+	})
+
+	t.Run("part two", func(t *testing.T) {
+		tests := map[string]testConfig{
+			"solution": {
+				input:     input,
+				logResult: true,
+			},
+		}
+
+		runTests(t, tests, cathodeRayTubePartTwo)
 	})
 }
