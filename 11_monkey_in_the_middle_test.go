@@ -3,22 +3,22 @@ package aoc
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
-	"sort"
 	"testing"
 	"time"
 )
 
 type monkey struct {
-	items []int
-	inspectFn func(worry int) int
-	throwFn func(item int)
+	items       []int
+	inspectFn   func(worry int) int
+	throwFn     func(item int)
 	inspections int
 }
 
 func (m *monkey) inspectItems() {
-	for _, _ = range m.items {
+	for range m.items {
 		m.inspect()
 		m.throwItem()
 	}
@@ -28,11 +28,7 @@ func (m *monkey) inspect() {
 	m.inspections++
 
 	worryLevel := m.items[0]
-
 	newWorryLevel := m.inspectFn(worryLevel)
-
-	newWorryLevel /= 3
-
 	m.items[0] = newWorryLevel
 }
 
@@ -46,23 +42,23 @@ func (m *monkey) catchItem(item int) {
 	m.items = append(m.items, item)
 }
 
-
 func monkeyInTheMiddlePartOne(input []string) int {
-	return monkeyInTheMiddle(input, 20)
+	return monkeyInTheMiddle(input, 20, true)
 }
 
-func monkeyInTheMiddle(input []string, rounds int) int {
+func monkeyInTheMiddlePartTwo(input []string) int {
+	return monkeyInTheMiddle(input, 10000, false)
+}
+
+func getMonkeys(input []string, isPartOne bool) []*monkey {
 	monkeys := []*monkey{}
 
 	// regex to find numbers
 	re := regexp.MustCompile("[0-9]+")
 
-	// newMonkey := &monkey{}
-	// Parse input, set state
-	// for _, line := range input 
-	for i := 0; i < len(input); i += 7 {
-		fmt.Println("===", input[i])
+	allTestNums := 1
 
+	for i := 0; i < len(input); i += 7 {
 		newMonkey := &monkey{
 			items: []int{},
 		}
@@ -73,9 +69,7 @@ func monkeyInTheMiddle(input []string, rounds int) int {
 		testTrueLine := input[i+4]
 		testFalseLine := input[i+5]
 
-		fmt.Println(itemsLine)
 		itemsStr := re.FindAllString(itemsLine, -1)
-		// fmt.Println(itemsStr)
 		for _, nStr := range itemsStr {
 			n, err := strconv.Atoi(nStr)
 			if err != nil {
@@ -84,13 +78,8 @@ func monkeyInTheMiddle(input []string, rounds int) int {
 			newMonkey.items = append(newMonkey.items, n)
 		}
 
-		fmt.Println(opLine)
 		opLineTrim := strings.TrimPrefix(opLine, "  Operation: new = ")
-		// fmt.Println(opLineTrim)
 		opLineSplit := strings.Fields(opLineTrim)
-		// for _, opPart := range opLineSplit {
-		// 	fmt.Println(opPart)
-		// }
 		a, b := 0, 0
 		aUseOld, bUseOld := false, false
 		if opLineSplit[0] == "old" {
@@ -120,20 +109,30 @@ func monkeyInTheMiddle(input []string, rounds int) int {
 				b = worry
 			}
 
+			newWorry := 0
 			if useOp == "+" {
-				return a + b
+				newWorry = a + b
+			} else {
+				newWorry = a * b
 			}
-			return a * b
+
+			// Must be a better way to inject this logic other than a bool flag...
+			if isPartOne {
+				newWorry /= 3
+			} else {
+				newWorry %= allTestNums
+			}
+
+			return newWorry
 		}
 
-		fmt.Println(testLine)
-		fmt.Println(testTrueLine)
-		fmt.Println(testFalseLine)
 		testNumStr := re.FindString(testLine)
 		testNum, err := strconv.Atoi(testNumStr)
 		if err != nil {
 			panic("failed to convert string to int")
 		}
+		allTestNums *= testNum
+
 		testTrueStr := re.FindString(testTrueLine)
 		testTrueNum, err := strconv.Atoi(testTrueStr)
 		if err != nil {
@@ -147,7 +146,7 @@ func monkeyInTheMiddle(input []string, rounds int) int {
 
 		newMonkey.throwFn = func(worry int) {
 			var target *monkey
-			if worry % testNum == 0 {
+			if worry%testNum == 0 {
 				target = monkeys[testTrueNum]
 			} else {
 				target = monkeys[testFalseNum]
@@ -155,24 +154,18 @@ func monkeyInTheMiddle(input []string, rounds int) int {
 			target.catchItem(worry)
 		}
 
-
 		monkeys = append(monkeys, newMonkey)
-
 	}
 
+	return monkeys
+}
 
-	fmt.Println(monkeys)
-	fmt.Println(monkeys[0].items)
-
-	// worryLevel := 0
-	// rounds := 20
+func monkeyInTheMiddle(input []string, rounds int, isPartOne bool) int {
+	monkeys := getMonkeys(input, isPartOne)
 
 	for i := 0; i < rounds; i++ {
-		fmt.Println("round:", i+1)
-
 		for _, monkey := range monkeys {
 			monkey.inspectItems()
-
 		}
 	}
 
