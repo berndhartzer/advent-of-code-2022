@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -86,4 +87,9 @@ func abs(n int) int {
 
 func printStruct(s interface{}) {
 	fmt.Printf("%+v\n", s)
+}
+
+func getNumbersFromString(s string) []string {
+	re := regexp.MustCompile("[0-9]+")
+	return re.FindAllString(s, -1)
 }
